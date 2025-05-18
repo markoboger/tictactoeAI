@@ -1,4 +1,4 @@
-package de.htwg.se.tictactoe
+package de.htwg.se.tictactoe.model
 
 case class Player(
     val name: String,

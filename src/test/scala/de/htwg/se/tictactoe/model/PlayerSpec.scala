@@ -1,4 +1,4 @@
-package de.htwg.se.tictactoe
+package de.htwg.se.tictactoe.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
