@@ -1,5 +1,39 @@
+# Scala
 *.class
+*.tasty
 *.log
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Build directories
+/target/
+/project/target/
+/target/
+/project/target/
+/project/metals.sbt
+
+# IDE specific
+
+.vscode/
+.bloop/
+.metals/
+
+
+# Virtual machine crash logs
 hs_err_pid*
+
+# SBT
+project/boot/
+project/target/
+project/project/
+/target/
+/.sbt*
+/.scala_build/
+
+# Maven
+/target/
+!target/scala-*/classes/
+!target/scala-*/resource-managed/
+
+# Build tool plugins
+.scoverage/
+.coverage/
+
