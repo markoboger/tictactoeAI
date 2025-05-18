@@ -1,3 +1,5 @@
+package de.htwg.se.tictactoe
+
 class Player(val name: String, var score: Int = 0) {
   // Private method that can only be accessed within this class
   private def updateScore(points: Int): Unit = {

@@ -1,3 +1,7 @@
+import de.htwg.se.tictactoe.Player
+import de.htwg.se.tictactoe.Board
+import de.htwg.se.tictactoe._
+
 object TicTacToe {
   def main(args: Array[String]): Unit = {
     // Create players

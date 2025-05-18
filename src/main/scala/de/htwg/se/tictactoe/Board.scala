@@ -1,3 +1,5 @@
+package de.htwg.se.tictactoe
+
 class Board(
     private val board: Vector[Vector[String]] = Vector.fill(3, 3)(" ")
 ) {
