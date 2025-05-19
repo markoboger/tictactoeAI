@@ -1,8 +1,9 @@
 package de.htwg.se.tictactoe.model
 
 case class Board(
-    board: Vector[Vector[Stone]] = Vector.fill(3, 3)(Stone.Empty),
-    size: Int = 3
+    grid: Vector[Vector[Stone]] = Vector.fill(3, 3)(Stone.Empty),
+    size: Int = 3,
+    gameState: GameState = GameState.Playing
 ) {
   def this(size: Int) = this(Vector.fill(size, size)(Stone.Empty), size)
 
@@ -11,61 +12,64 @@ case class Board(
     val cellSeparator = "-"
     val separator =
       s"+" + (cellSeparator * (cellSize) + "+") * size + "\n"
-    val rows = board.map { row =>
+    val rows = grid.map { row =>
       val cells = row.map(_.toString)
       s"${cells.mkString("|" + " " * (cellSize / 2), " " * (cellSize / 2) + "|" + " " * (cellSize / 2), " " * (cellSize / 2) + "")}|\n"
     }
     rows.mkString(s"$separator", s"$separator", s"$separator")
   }
 
-  def checkWin: Stone = {
-    // Check rows
-    val rowWin = board.find(row => {
-      val nonEmpty = row.filter(_ != Stone.Empty)
-      nonEmpty.nonEmpty && (nonEmpty.forall(_ == Stone.X) || nonEmpty.forall(
-        _ == Stone.O
-      ))
-    })
+  def checkWin: GameState = {
+    type StepInDirection = 0 | 1 | -1
+    enum Direction(val xStep: StepInDirection, val yStep: StepInDirection) {
+      case Row extends Direction(0, 1)
+      case Column extends Direction(1, 0)
+      case MainDiagonal extends Direction(1, 1)
+      case AntiDiagonal extends Direction(1, -1)
+    }
 
-    // Check columns
-    val colWin = board.transpose.find(col => {
-      val nonEmpty = col.filter(_ != Stone.Empty)
-      nonEmpty.nonEmpty && (nonEmpty.forall(_ == Stone.X) || nonEmpty.forall(
-        _ == Stone.O
-      ))
-    })
+    val directions: List[Direction] =
+      import Direction._
+      List(Row, Column, MainDiagonal, AntiDiagonal)
 
-    // Check diagonals
-    val diag1 = board.indices.forall(i => {
-      val stone = board(i)(i)
-      stone != Stone.Empty && (board.indices.forall(j => board(j)(j) == stone))
-    })
+    def getCellsInDirection(xStart: Int, yStart: Int, dir: Direction): List[Stone] =
+      (for {
+        i <- 0 until size
+        x = dir.xStep * i + xStart
+        y = dir.yStep * i + yStart
+      } yield grid(x)(y)).toList
 
-    val diag2 = board.indices.forall(i => {
-      val stone = board(i)(size - 1 - i)
-      stone != Stone.Empty && (board.indices.forall(j =>
-        board(j)(size - 1 - j) == stone
-      ))
-    })
+    val rows = for i <- 0 until size yield {
+      getCellsInDirection(i, 0, Direction.Row)
+    }.toList
 
-    if rowWin.isDefined then rowWin.get.head
-    else if colWin.isDefined then colWin.get.head
-    else if diag1 then board(0)(0)
-    else if diag2 then board(0)(size - 1)
-    else Stone.Empty
+    val columns = for j <- 0 until size yield {
+      getCellsInDirection(0, j, Direction.Column)
+    }.toList
+
+    val mainDiagonal = getCellsInDirection(0, 0, Direction.MainDiagonal).toList
+    val antiDiagonal = getCellsInDirection(0, size - 1, Direction.AntiDiagonal).toList
+
+    val allLines = rows ++ columns ++ List(mainDiagonal) ++ List(antiDiagonal)
+
+    if allLines.exists(_.forall(_ == Stone.X)) then GameState.XWon
+    else if allLines.exists(_.forall(_ == Stone.O)) then GameState.OWon
+    else if grid.forall(_.forall(_ != Stone.Empty)) then GameState.Draw
+    else GameState.Playing
   }
 
   def makeMove(row: Int, col: Int, stone: Stone): Board = {
-    new Board(board.updated(row, board(row).updated(col, stone)), size)
+    val newGrid = grid.updated(row, grid(row).updated(col, stone))
+    val newGameState = {
+      val win = checkWin
+      if win == GameState.XWon then GameState.XWon
+      else if win == GameState.OWon then GameState.OWon
+      else if newGrid.forall(_.forall(_ != Stone.Empty)) then GameState.Draw
+      else GameState.Playing
+    }
+    new Board(newGrid, size, newGameState)
   }
 
-  def isFull: Boolean = board.forall(_.forall(_ != Stone.Empty))
+  def isFull: Boolean = grid.forall(_.forall(_ != Stone.Empty))
 
-  def gameState: GameState = {
-    val win = checkWin
-    if win == Stone.X then GameState.XWon
-    else if win == Stone.O then GameState.OWon
-    else if board.flatten.exists(_ == Stone.Empty) then GameState.Playing
-    else GameState.Draw
-  }
 }

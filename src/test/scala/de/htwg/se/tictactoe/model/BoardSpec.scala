@@ -18,49 +18,90 @@ class BoardSpec extends AnyWordSpec with Matchers {
     }
 
     "allow moves" in {
-      val board = new Board()
+      val board = new Board(size = 3)
       val updatedBoard = board.makeMove(0, 0, Stone.X)
+      updatedBoard.grid(0)(0) shouldBe Stone.X
       updatedBoard.gameState shouldBe GameState.Playing
     }
 
-    "detect wins" in {
-      val board = new Board()
-      val updatedBoard = board
-        .makeMove(0, 0, Stone.X)
-        .makeMove(0, 1, Stone.X)
-        .makeMove(0, 2, Stone.X)
-      updatedBoard.gameState shouldBe GameState.XWon
-    }
+    "detect a full board" in {
+      val board1x1 = new Board(size = 1)
+      board1x1.isFull shouldBe false
+      board1x1.makeMove(0, 0, Stone.X).isFull shouldBe true
 
-    "detect draws" in {
-      val board = new Board()
-      val finalBoard = board
+      val board3x3 = new Board(size = 3)
+      board3x3.isFull shouldBe false
+      val fullBoard = board3x3
         .makeMove(0, 0, Stone.X)
         .makeMove(0, 1, Stone.O)
         .makeMove(0, 2, Stone.X)
         .makeMove(1, 0, Stone.O)
         .makeMove(1, 1, Stone.X)
         .makeMove(1, 2, Stone.O)
-        .makeMove(2, 0, Stone.X)
-        .makeMove(2, 1, Stone.O)
-        .makeMove(2, 2, Stone.X)
-      finalBoard.gameState shouldBe GameState.Draw
+        .makeMove(2, 0, Stone.O)
+        .makeMove(2, 1, Stone.X)
+        .makeMove(2, 2, Stone.O)
+      fullBoard.isFull shouldBe true
+      fullBoard.gameState shouldBe GameState.Draw
+    }
+
+    "detect a game is ongoing" in {
+      val board = new Board(size = 3)
+      board.gameState shouldBe GameState.Playing
+      board.makeMove(0, 0, Stone.X).gameState shouldBe GameState.Playing
+    }
+
+    "detect wins" in {
+
+      val board1 = new Board(size = 1)
+      val updatedBoard1 = board1.makeMove(0, 0, Stone.X)
+      updatedBoard1.checkWin shouldBe GameState.XWon
+
+      val board2 = new Board(size = 1)
+      val updatedBoard2 = board2.makeMove(0, 0, Stone.O)
+      updatedBoard2.checkWin shouldBe GameState.OWon
+
+      val board3 = new Board(size = 3)
+      val updatedBoard3 = board3
+        .makeMove(0, 0, Stone.X)
+        .makeMove(0, 1, Stone.X)
+        .makeMove(0, 2, Stone.X)
+      updatedBoard3.checkWin shouldBe GameState.XWon
+    }
+
+    "detect draws" in {
+      val board4 = new Board(size = 3)
+      val finalBoard = board4
+        .makeMove(0, 0, Stone.X)
+        .makeMove(0, 1, Stone.O)
+        .makeMove(0, 2, Stone.X)
+        .makeMove(1, 0, Stone.O)
+        .makeMove(1, 1, Stone.X)
+        .makeMove(1, 2, Stone.O)
+        .makeMove(2, 0, Stone.O)
+        .makeMove(2, 1, Stone.X)
+        .makeMove(2, 2, Stone.O)
+      finalBoard.checkWin shouldBe GameState.Draw
     }
 
     "have correct dimensions" in {
       val board = new Board()
-      board.board.size shouldBe 3
-      board.board.map(_.size).forall(_ == 3) shouldBe true
+      board.grid.size shouldBe 3
+      board.grid.map(_.size).forall(_ == 3) shouldBe true
     }
 
     "work with different board sizes" in {
-      val board4x4 = new Board(Vector.fill(4, 4)(Stone.Empty), 4)
-      board4x4.board.size shouldBe 4
-      board4x4.board.map(_.size).forall(_ == 4) shouldBe true
+      val board1x1 = new Board(Vector.fill(1, 1)(Stone.Empty), 1)
+      board1x1.grid.size shouldBe 1
+      board1x1.grid.map(_.size).forall(_ == 1) shouldBe true
+
+      val board3x3 = new Board(Vector.fill(3, 3)(Stone.Empty), 3)
+      board3x3.grid.size shouldBe 3
+      board3x3.grid.map(_.size).forall(_ == 3) shouldBe true
 
       val board5x5 = new Board(Vector.fill(5, 5)(Stone.Empty), 5)
-      board5x5.board.size shouldBe 5
-      board5x5.board.map(_.size).forall(_ == 5) shouldBe true
+      board5x5.grid.size shouldBe 5
+      board5x5.grid.map(_.size).forall(_ == 5) shouldBe true
     }
   }
 }
