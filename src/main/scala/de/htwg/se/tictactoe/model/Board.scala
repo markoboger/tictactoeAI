@@ -59,17 +59,6 @@ case class Board(
   }
 
   def makeMove(row: Int, col: Int, stone: Stone): Board = {
-    val newGrid = grid.updated(row, grid(row).updated(col, stone))
-    val newGameState = {
-      val win = checkWin
-      if win == GameState.XWon then GameState.XWon
-      else if win == GameState.OWon then GameState.OWon
-      else if newGrid.forall(_.forall(_ != Stone.Empty)) then GameState.Draw
-      else GameState.Playing
-    }
-    new Board(newGrid, size, newGameState)
+    copy(grid.updated(row, grid(row).updated(col, stone)), size, checkWin)
   }
-
-  def isFull: Boolean = grid.forall(_.forall(_ != Stone.Empty))
-
 }

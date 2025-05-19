@@ -26,11 +26,11 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
     "detect a full board" in {
       val board1x1 = new Board(size = 1)
-      board1x1.isFull shouldBe false
-      board1x1.makeMove(0, 0, Stone.X).isFull shouldBe true
+      board1x1.checkWin shouldBe GameState.Playing
+      board1x1.makeMove(0, 0, Stone.X).checkWin shouldBe GameState.XWon
 
       val board3x3 = new Board(size = 3)
-      board3x3.isFull shouldBe false
+      board3x3.checkWin shouldBe GameState.Playing
       val fullBoard = board3x3
         .makeMove(0, 0, Stone.X)
         .makeMove(0, 1, Stone.O)
@@ -41,8 +41,7 @@ class BoardSpec extends AnyWordSpec with Matchers {
         .makeMove(2, 0, Stone.O)
         .makeMove(2, 1, Stone.X)
         .makeMove(2, 2, Stone.O)
-      fullBoard.isFull shouldBe true
-      fullBoard.gameState shouldBe GameState.Draw
+      fullBoard.checkWin shouldBe GameState.Draw
     }
 
     "detect a game is ongoing" in {
